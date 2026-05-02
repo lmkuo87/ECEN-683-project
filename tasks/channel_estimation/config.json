@@ -10,10 +10,10 @@
     "eval_timeout": 240,
     "sionna_doc_config": {
       "cache_dir_path": "api_doc_cache",
-      "embedding_model": "",
-      "embedding_base_url": "",
-      "reranker_model": "",
-      "reranker_base_url": "",
+      "embedding_model": "BAAI/bge-small-en-v1.5",
+      "embedding_base_url": "dummy",
+      "reranker_model": "dummy",
+      "reranker_base_url": "dummy",
       "retrieve_k": 12,
       "rerank_top_n": 4
     }
@@ -27,14 +27,14 @@
   "prompt_path": "prompt.md",
   "num_ideas": 5,
   "agent_llm": {
-    "model": "",
-    "base_url": "",
+    "model": "meta-llama/Meta-Llama-3-8B-Instruct",
+    "base_url": "https://router.huggingface.co/v1",
     "temperature": 0.7,
     "top_p": 0.95
   },
   "manager_llm": {
-    "model": "",
-    "base_url": "",
+    "model": "meta-llama/Meta-Llama-3-8B-Instruct",
+    "base_url": "https://router.huggingface.co/v1",
     "temperature": 0.7,
     "top_p": 0.95
   }
