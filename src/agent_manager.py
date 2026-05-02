@@ -550,16 +550,14 @@ Reply with **only** a JSON object with one key: "summary" (the summary text). Ex
         self._print_final_summary(leaderboard)
         return leaderboard
 
-    def _get_manager_llm(self):  # 把原本後面的 -> ChatOpenAI 刪掉
+    def _get_manager_llm(self):  
         """Get or create the LLM used for generating ideas and summarizing solutions."""
         if self._manager_llm is None:
-            print("正在載入本地 Llama-3 模型給 Manager 使用...")
+            print("Loading the local Llama-3 model for Manager use...")
             
-            # 填入你剛剛成功申請的 Token
-            YOUR_HF_TOKEN = "hf_你的Token字串...................."
+            YOUR_HF_TOKEN = "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"
             model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
             
-            # 使用 4-bit 量化設定
             bnb_config = BitsAndBytesConfig(load_in_4bit=True)
             
             tokenizer = AutoTokenizer.from_pretrained(model_id, token=YOUR_HF_TOKEN)
@@ -570,12 +568,11 @@ Reply with **only** a JSON object with one key: "summary" (the summary text). Ex
                 token=YOUR_HF_TOKEN
             )
             
-            # 建立管線並封裝給 LangChain 使用
             pipe = pipeline(
                 "text-generation", 
                 model=model, 
                 tokenizer=tokenizer, 
-                max_new_tokens=1024 # 給它多一點 token 額度來生成總結
+                max_new_tokens=1024 
             )
             self._manager_llm = HuggingFacePipeline(pipeline=pipe)
             
