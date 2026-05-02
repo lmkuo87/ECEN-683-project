@@ -13,7 +13,10 @@ from typing import Optional
 
 import numpy as np
 from langchain.agents import create_agent
-from langchain_openai import ChatOpenAI
+# from langchain_openai import ChatOpenAI
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline, BitsAndBytesConfig
+from langchain_community.llms import HuggingFacePipeline
+import torch
 
 from config import LLMConfig, WorkspaceConfig, ToolsConfig
 from tool_lib.base import ToolProvider
@@ -150,7 +153,31 @@ class Agent:
         self._current_journal_path = None  # Set during run() for timeout logging
 
         # Build the LLM
-        self.llm = ChatOpenAI(**asdict(llm_config))
+        _shared_llm = None
+
+        def get_shared_llm(hf_token):
+            global _shared_llm
+            if _shared_llm is None:
+                print("正在為 Worker 載入 Llama-3 模型...")
+                model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
+                bnb_config = BitsAndBytesConfig(load_in_4bit=True)
+                
+                tokenizer = AutoTokenizer.from_pretrained(model_id, token=hf_token)
+                model = AutoModelForCausalLM.from_pretrained(
+                    model_id,
+                    device_map="auto",
+                    quantization_config=bnb_config,
+                    token=hf_token
+                )
+                
+                pipe = pipeline(
+                    "text-generation",
+                    model=model,
+                    tokenizer=tokenizer,
+                    max_new_tokens=2048 # Worker 需要生成較長的程式碼，建議給多一點
+                )
+                _shared_llm = HuggingFacePipeline(pipeline=pipe)
+            return _shared_llm
 
         # Create task-specific tools from factory (if provided)
         self.tool_factory = None
