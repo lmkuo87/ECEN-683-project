@@ -158,7 +158,7 @@ class Agent:
         def get_shared_llm(hf_token):
             global _shared_llm
             if _shared_llm is None:
-                print("正在為 Worker 載入 Llama-3 模型...")
+                print("Loading Llama-3 model for Worker...")
                 model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
                 bnb_config = BitsAndBytesConfig(load_in_4bit=True)
                 
@@ -174,7 +174,7 @@ class Agent:
                     "text-generation",
                     model=model,
                     tokenizer=tokenizer,
-                    max_new_tokens=2048 # Worker 需要生成較長的程式碼，建議給多一點
+                    max_new_tokens=2048
                 )
                 _shared_llm = HuggingFacePipeline(pipeline=pipe)
             return _shared_llm
