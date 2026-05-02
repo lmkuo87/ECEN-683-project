@@ -24,8 +24,9 @@ from typing import Optional
 import random
 # from langchain_openai import ChatOpenAI
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline, BitsAndBytesConfig
-from langchain_community.llms import HuggingFacePipeline
-from langchain_community.chat_models.huggingface import ChatHuggingFace
+#from langchain_community.llms import HuggingFacePipeline
+#from langchain_community.chat_models.huggingface import ChatHuggingFace
+from langchain_huggingface import HuggingFacePipeline, ChatHuggingFace
 import torch
 
 import printer
