@@ -15,7 +15,8 @@ import numpy as np
 from langchain.agents import create_agent
 # from langchain_openai import ChatOpenAI
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline, BitsAndBytesConfig
-from langchain_community.llms import HuggingFacePipeline
+#from langchain_community.llms import HuggingFacePipeline
+from langchain_huggingface import HuggingFacePipeline, ChatHuggingFace
 import torch
 
 from config import LLMConfig, WorkspaceConfig, ToolsConfig
@@ -153,31 +154,32 @@ class Agent:
         self._current_journal_path = None  # Set during run() for timeout logging
 
         # Build the LLM
-        _shared_llm = None
-
-        def get_shared_llm(hf_token):
-            global _shared_llm
-            if _shared_llm is None:
-                print("Loading Llama-3 model for Worker...")
-                model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
-                bnb_config = BitsAndBytesConfig(load_in_4bit=True)
-                
-                tokenizer = AutoTokenizer.from_pretrained(model_id, token=hf_token)
-                model = AutoModelForCausalLM.from_pretrained(
-                    model_id,
-                    device_map="auto",
-                    quantization_config=bnb_config,
-                    token=hf_token
-                )
-                
-                pipe = pipeline(
-                    "text-generation",
-                    model=model,
-                    tokenizer=tokenizer,
-                    max_new_tokens=2048
-                )
-                _shared_llm = HuggingFacePipeline(pipeline=pipe)
-            return _shared_llm
+        global _shared_llm
+        if '_shared_llm' not in globals() or _shared_llm is None:
+            print("Loading Llama-3 model for Agent Worker...")
+            model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
+            bnb_config = BitsAndBytesConfig(load_in_4bit=True)
+            
+            tokenizer = AutoTokenizer.from_pretrained(model_id)
+            model = AutoModelForCausalLM.from_pretrained(
+                model_id,
+                device_map="auto",
+                quantization_config=bnb_config
+            )
+            
+            pipe = pipeline(
+                "text-generation",
+                model=model,
+                tokenizer=tokenizer,
+                max_new_tokens=2048,      
+                repetition_penalty=1.15   
+            )
+            
+            from langchain_huggingface import HuggingFacePipeline, ChatHuggingFace
+            hf_llm = HuggingFacePipeline(pipeline=pipe)
+            _shared_llm = ChatHuggingFace(llm=hf_llm)
+        
+        self.llm = _shared_llm
 
         # Create task-specific tools from factory (if provided)
         self.tool_factory = None
