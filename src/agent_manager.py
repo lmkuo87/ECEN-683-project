@@ -25,6 +25,7 @@ import random
 # from langchain_openai import ChatOpenAI
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline, BitsAndBytesConfig
 from langchain_community.llms import HuggingFacePipeline
+from langchain_community.chat_models.huggingface import ChatHuggingFace
 import torch
 
 import printer
@@ -573,9 +574,12 @@ Reply with **only** a JSON object with one key: "summary" (the summary text). Ex
                 model=model, 
                 tokenizer=tokenizer, 
                 max_new_tokens=1024,
+                repetition_penalty=1.15,
                 return_full_text=False 
             )
-            self._manager_llm = HuggingFacePipeline(pipeline=pipe)
+            #self._manager_llm = HuggingFacePipeline(pipeline=pipe)
+            hf_llm = HuggingFacePipeline(pipeline=pipe)
+            self._manager_llm = ChatHuggingFace(llm=hf_llm)
             
         return self._manager_llm
 
