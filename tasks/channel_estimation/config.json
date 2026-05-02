@@ -18,7 +18,7 @@
       "rerank_top_n": 4
     }
   },
-  "num_workers": 5,
+  "num_workers": 1,
   "higher_is_better": false,
   "population_size": 20,
   "num_generations": 10,
