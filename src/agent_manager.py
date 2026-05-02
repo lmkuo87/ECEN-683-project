@@ -555,7 +555,7 @@ Reply with **only** a JSON object with one key: "summary" (the summary text). Ex
         if self._manager_llm is None:
             print("Loading the local Llama-3 model for Manager use...")
             
-            YOUR_HF_TOKEN = "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"
+            YOUR_HF_TOKEN = "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"
             model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
             
             bnb_config = BitsAndBytesConfig(load_in_4bit=True)
@@ -572,7 +572,8 @@ Reply with **only** a JSON object with one key: "summary" (the summary text). Ex
                 "text-generation", 
                 model=model, 
                 tokenizer=tokenizer, 
-                max_new_tokens=1024 
+                max_new_tokens=1024,
+                return_full_text=False 
             )
             self._manager_llm = HuggingFacePipeline(pipeline=pipe)
             
@@ -636,7 +637,7 @@ Reply with **only** a JSON object with one key: "summary" (the summary text). Ex
         prompt = self.IDEAS_INITIAL_PROMPT.format(n=n, query=query)
         self._log_manager("PROMPT (initial ideas)", prompt)
         response = invoke_llm_with_retry(llm, prompt, context="initial ideas")
-        content = response.content.strip()
+        content = response.content.strip() if hasattr(response, "content") else str(response).strip()
         self._log_manager("RESPONSE (initial ideas)", content)
         parsed = self._parse_initial_ideas_json(content, n)
         if parsed is None:
@@ -658,6 +659,7 @@ Reply with **only** a JSON object with one key: "summary" (the summary text). Ex
         )
         self._log_manager("PROMPT (summarize)", prompt)
         response = invoke_llm_with_retry(llm, prompt, context="summarize")
+        raw_content = response.content.strip() if hasattr(response, "content") else str(response).strip()
         content = response.content.strip() or "No summary."
         self._log_manager("RESPONSE (summarize)", content)
         summary = self._parse_summary_json(content)
@@ -709,7 +711,7 @@ Reply with **only** a JSON object with one key: "summary" (the summary text). Ex
         )
         self._log_manager("PROMPT (ideas from results)", prompt)
         response = invoke_llm_with_retry(llm, prompt, context="ideas from results")
-        content = response.content.strip()
+        content = response.content.strip() if hasattr(response, "content") else str(response).strip()
         self._log_manager("RESPONSE (ideas from results)", content)
         descriptions, refs_per_idea = self._parse_ideas_from_results_response(content, n)
         if not descriptions:
