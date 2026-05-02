@@ -22,7 +22,10 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Optional
 import random
-from langchain_openai import ChatOpenAI
+# from langchain_openai import ChatOpenAI
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline, BitsAndBytesConfig
+from langchain_community.llms import HuggingFacePipeline
+import torch
 
 import printer
 from config import Config, LLMConfig, WorkspaceConfig, ToolsConfig
@@ -547,11 +550,35 @@ Reply with **only** a JSON object with one key: "summary" (the summary text). Ex
         self._print_final_summary(leaderboard)
         return leaderboard
 
-    def _get_manager_llm(self) -> ChatOpenAI:
+    def _get_manager_llm(self):  # 把原本後面的 -> ChatOpenAI 刪掉
         """Get or create the LLM used for generating ideas and summarizing solutions."""
         if self._manager_llm is None:
-            config_dict = asdict(self.config.manager_llm)
-            self._manager_llm = ChatOpenAI(**config_dict)
+            print("正在載入本地 Llama-3 模型給 Manager 使用...")
+            
+            # 填入你剛剛成功申請的 Token
+            YOUR_HF_TOKEN = "hf_你的Token字串...................."
+            model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
+            
+            # 使用 4-bit 量化設定
+            bnb_config = BitsAndBytesConfig(load_in_4bit=True)
+            
+            tokenizer = AutoTokenizer.from_pretrained(model_id, token=YOUR_HF_TOKEN)
+            model = AutoModelForCausalLM.from_pretrained(
+                model_id,
+                device_map="auto",
+                quantization_config=bnb_config,
+                token=YOUR_HF_TOKEN
+            )
+            
+            # 建立管線並封裝給 LangChain 使用
+            pipe = pipeline(
+                "text-generation", 
+                model=model, 
+                tokenizer=tokenizer, 
+                max_new_tokens=1024 # 給它多一點 token 額度來生成總結
+            )
+            self._manager_llm = HuggingFacePipeline(pipeline=pipe)
+            
         return self._manager_llm
 
     def _parse_initial_ideas_json(self, response_text: str, n: int) -> Optional[list[str]]:
