@@ -26,6 +26,7 @@ from bs4 import BeautifulSoup
 from markdownify import markdownify as md
 from langchain_core.documents import Document
 
+from langchain_community.embeddings import HuggingFaceEmbeddings
 
 class HttpEmbeddings:
     """Embedding client using TEI's native ``/embed`` endpoint.
@@ -289,7 +290,8 @@ class SionnaDoc(ToolProvider):
         cache_path.mkdir(parents=True, exist_ok=True)
         markdown_path.mkdir(parents=True, exist_ok=True)
 
-        embeddings = HttpEmbeddings(embedding_model, embedding_base_url)
+        #embeddings = HttpEmbeddings(embedding_model, embedding_base_url)
+        embeddings = HuggingFaceEmbeddings(model_name=embedding_model)
 
         # Optional LLM for tutorial summarisation
         summarize_agent = cls._build_summarize_agent(cfg)
@@ -487,7 +489,8 @@ class SionnaDoc(ToolProvider):
                     "Ensure SionnaDoc.build() has been called before instantiation."
                 )
 
-            embeddings = HttpEmbeddings(embedding_model, embedding_base_url)
+            #embeddings = HttpEmbeddings(embedding_model, embedding_base_url)
+            embeddings = HuggingFaceEmbeddings(model_name=embedding_model)
 
             index_faiss_path = str(vectorstore_path / "index.faiss")
             index_pkl_path = str(vectorstore_path / "index.pkl")
