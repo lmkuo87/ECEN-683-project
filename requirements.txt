@@ -12,7 +12,6 @@ bitsandbytes
 transformers 
 sentence-transformers
 
-langchain 
 langchain-community
 chromadb
 -U langchain-huggingface
