@@ -14,4 +14,3 @@ sentence-transformers
 
 langchain-community
 chromadb
--U langchain-huggingface
