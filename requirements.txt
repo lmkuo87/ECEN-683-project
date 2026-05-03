@@ -6,3 +6,13 @@ numpy
 bs4
 faiss-gpu-cu12
 markdownify
+
+accelerate
+bitsandbytes 
+transformers 
+sentence-transformers
+
+langchain 
+langchain-community
+chromadb
+-U langchain-huggingface
